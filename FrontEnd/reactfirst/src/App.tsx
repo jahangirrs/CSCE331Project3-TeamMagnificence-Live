@@ -3,7 +3,8 @@ import './App.css'
 import React from 'react'
 
 //URL variable, change depending on local testing or Live push
-let BackendURL = "https://csce331project3-teammagnificence-live.onrender.com/";
+ let BackendURL = "https://csce331project3-teammagnificence-live.onrender.com/";
+//let BackendURL = "http://localhost:3000/";
 
 //Fetch and Build employee Table
 function EmployeeView(){
@@ -294,6 +295,79 @@ function PurchaseOrderView(){
   );
 }
 
+//Fetch report of orders between user inputted dates
+function UserSalesReportView(){
+  const [salesReport, setSalesReport] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  //API call to backend for sales data between startDate and endDate, make call every time input is updated
+  function inputHandler(){
+    alert("Input handler called");
+   // if(startDate != "" && endDate != ""){
+   //   alert("Input handler past check");
+      alert(startDate);
+      alert(endDate);
+      React.useEffect(() => {
+        fetch(BackendURL + "manager/salesData?startDate=" + startDate + "&endDate=" + endDate)
+        .then((res) => res.json())
+        .then((data) => setSalesReport(data))
+        .catch(e => console.log(e))
+      }, []);
+   // }
+}
+
+  var salesReportData = JSON.parse(JSON.stringify(salesReport));
+  let rows = new Array();
+  for(var i in salesReportData){
+    rows.push([salesReportData[i].id, salesReportData[i].date, salesReportData[i].total_cost, salesReportData[i].member]);
+  }
+
+  return(
+
+    <> 
+      <h1>Sales Report</h1>
+
+      <label htmlFor = {startDate}>Start Date:
+
+        <input onChange = {e => { setStartDate(e.target.value); inputHandler() } } type = "date"></input>
+
+      </label>
+
+      <label htmlFor = {endDate}>End Date:
+        <input onChange = {e => {setEndDate(e.target.value); inputHandler() } } type = "date"></input>
+      </label>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Cost</th>
+            <th>Member</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map( (row:any) =>
+            
+            <tr key = {row}>{
+              row.map( (data:any) =>
+              
+                <td key = {data + Math.random()}>{data}</td>
+              )
+              
+            }</tr>
+          
+          )}
+        </tbody>
+      </table>
+    
+    </>
+
+
+  );
+}
+
 function App() {
   //Tab display values
   const [displayEmployee, setDisplayEmployee] = useState(false);
@@ -301,6 +375,7 @@ function App() {
   const [displayMenu, setDisplayMenu] = useState(false);
   const [displayHourlySales, setDisplayHourlySales] = useState(false);
   const [displayPurchaseOrders, setDisplayPurchaseOrders] = useState(false);
+  const [displaySalesReport, setDisplaySalesReport] = useState(false);
 
   //Hide all views
   function hideAll(){
@@ -309,6 +384,7 @@ function App() {
     setDisplayMenu(() => false);
     setDisplayHourlySales(() => false);
     setDisplayPurchaseOrders(() => false);
+    setDisplaySalesReport(() => false);
   }
 
   //Toggle view on button clicks
@@ -337,13 +413,18 @@ function App() {
     setDisplayPurchaseOrders((displayPurchaseOrders) => !displayPurchaseOrders);
   }
 
+  function toggleSalesReport(){
+    hideAll();
+    setDisplaySalesReport((displaySalesReport) => !displaySalesReport);
+  }
+
   return (
     <>
       <div>
       <button onClick = {toggleEmployees}>Employees</button>
       <button onClick = {toggleInventory}>Inventory</button>
       <button onClick = {toggleMenu}>Menu</button>
-      <button>Sales Data</button>
+      <button onClick = {toggleSalesReport}>Sales Data</button>
       <button onClick = {toggleHourlySales}>Hourly Sales</button>
       <button onClick = {togglePurchaseOrders}>Purchase Order</button>
       </div>
@@ -352,6 +433,7 @@ function App() {
       {displayMenu && <MenuView />}
       {displayHourlySales && <HourlySalesView />}
       {displayPurchaseOrders && <PurchaseOrderView/>}
+      {displaySalesReport && <UserSalesReportView/>}
     </>
   )
 }

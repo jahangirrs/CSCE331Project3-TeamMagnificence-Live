@@ -12,6 +12,7 @@ const port = 3000;
 //Set who can request
 const corsOrigin = {
     origin: "https://csce331project3-teammagnificence-live-o7uu.onrender.com"
+  //  origin: "http://localhost:5173"
 }
 app.use(cors(corsOrigin));
 
@@ -142,6 +143,28 @@ app.get("/manager/hourlySales", (req, res) => {
 });
 
 //Get sales data given a specific time window
+app.get("/manager/salesData", (req, res) => {
+
+    startDate = req.params.start;
+    endDate = req.params.end;
+    console.log(startDate);
+    console.log(endDate);
+    //get sales data from backend
+    sales = []
+    pool
+        .query(`SELECT * FROM orders WHERE date BETWEEN ` + 
+            "'" + startDate + "'" +  " AND " + 
+            "'" +  endDate + "'")
+        .then(query_res => {
+            for (let i = 0; i < query_res.rowCount; i++){
+                sales.push(query_res.rows[i]);
+            }
+            const data = {sales: sales};
+            res.json(sales);
+        });
+
+
+});
 
 
 app.get("/manager/purchaseOrder", (req, res) => {
