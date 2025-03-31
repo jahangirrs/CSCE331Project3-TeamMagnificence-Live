@@ -78,13 +78,12 @@ function App() {
         total_Cost += item.cost;
     });
 
-    //const total_Cost = cart_Items.reduce((sum, item) => sum + item.cost, 0);
-
     return(
         <div style = {{
             width: '100%',
             display: 'flex'
             }}>
+            {/*Left (80%) side of the page, menu item buttons*/}
             <div style= {{
                 width: '80%',
                 display: 'flex',
@@ -131,6 +130,7 @@ function App() {
                     ))
                 }
             </div>
+            {/*Right (20%) side of the page, current order*/}
             <div style = {{
                 width: '20%',
                 display: 'flex',
