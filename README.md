@@ -13,3 +13,9 @@ SPRINT 1:
   John: yesterday, learned react and got general layout of Kiosk UI. Today, implemented menu items and order total functionality 
   Jackson: yesterday and today, edited CSS to make sure site is asccessible and aesthetic.
   Daniel: yesterday, learned how to use react.
+
+
+Hosted live at : 
+Frontend: https://csce331project3-teammagnificence-live-o7uu.onrender.com/
+Backend: https://csce331project3-teammagnificence-live.onrender.com/
+
