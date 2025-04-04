@@ -1,108 +1,157 @@
-import { useState } from 'react'
-import './App.css'
-import React from 'react'
+import { useState, useEffect } from 'react';
+import { fetchWeatherApi } from 'openmeteo';
+import './App.css';
+import React from 'react';
 
-/*const toppings=[
-    'Pearl', 'Red Bean', 'Herb Jelly', 'Aiyu Jelly', 'Lychee Jelly', 'Mini Pearl', 'Ice Cream Pudding', 'Aloe Vero', 'Crystal Boba'
-]*/
-
-type Item={
+type Item = {
     name: string;
     group: string;
     cost: number;
     id: number;
-}
-
-/*type Cust_Item = Item&{
-    icePer: number;
-    sugarPer: number;
-    topping: string;
-    numberOf: number;
-    totalCost: number;
-}*/
+};
 
 function App() {
     const [cart_Items, set_Cart_Items] = useState<Item[]>([]);
+    const [menu_Items, set_Menu] = useState("");
+    const [weatherData, setWeatherData] = useState<any>(null);
+    const [weatherError, setWeatherError] = useState<string | null>(null); // To capture errors
 
-    
-        const [menu_Items, set_Menu] = useState("");
-      
-        React.useEffect(()=>{
-          fetch("http://localhost:3000/" + "manager/menu")
-          .then((res) => res.json())
-          .then((data) => set_Menu(data))
-          .catch(e => console.log(e))
-        }, []);
-      
-        var menu_Data = JSON.parse(JSON.stringify(menu_Items));
+    useEffect(() => {
+        const fetchWeather = async () => {
+            try {
+                console.log("Fetching weather data...");
+                const params = {
+                    latitude: 30.628,
+                    longitude: -96.3344,
+                    hourly: "temperature_2m",
+                    current: "temperature_2m",
+                    timezone: "auto",
+                    forecast_days: 1,
+                    temperature_unit: "fahrenheit"
+                };
+                const url = "https://api.open-meteo.com/v1/forecast";
+                const responses = await fetchWeatherApi(url, params);
+        
+                if (!responses || responses.length === 0) {
+                    throw new Error("Invalid response from weather API");
+                }
+        
+                const response = responses[0];
+                const utcOffsetSeconds = response.utcOffsetSeconds();
+                const current = response.current()!;
+                const hourly = response.hourly()!;
+        
+                const range = (start: number, stop: number, step: number) =>
+                    Array.from({ length: (stop - start) / step }, (_, i) => start + i * step);
+        
+                const rawTimes = range(Number(hourly.time()), Number(hourly.timeEnd()), hourly.interval()).map(
+                    (t) => new Date((t + utcOffsetSeconds) * 1000)
+                );
+        
+                const rawTemps = hourly.variables(0)!.valuesArray()!;
+        
+                const now = new Date();
+        
+                // Filter times and temperatures to show only upcoming hours
+                const filteredForecast = rawTimes
+                    .map((time, index) => ({ time, temp: rawTemps[index] }))
+                    .filter(entry => entry.time >= now);
+        
+                const weatherData = {
+                    current: {
+                        time: new Date((Number(current.time()) + utcOffsetSeconds) * 1000),
+                        temperature2m: Number(current.variables(0)!.value()).toFixed(1),
+                    },
+                    hourly: {
+                        time: filteredForecast.map(entry => entry.time),
+                        temperature2m: filteredForecast.map(entry => Number(entry.temp).toFixed(1)),
+                    },
+                };
+        
+                setWeatherData(weatherData);
+                console.log("Weather data received:", weatherData);
+            } catch (error) {
+                console.error("Error fetching weather data:", error);
+                setWeatherError("Failed to load weather data. Check console.");
+            }
+        };
+        fetchWeather();
+    }, []);
+
+    var menu_Data = JSON.parse(JSON.stringify(menu_Items));
         const menu: Item[] = [];
         for(var i in menu_Data){
             menu.push({id: menu_Data[i].id, name: menu_Data[i].item_name, cost: menu_Data[i].base_cost, group: menu_Data[i].item_group});
         }
-          
-        
 
+    const menuCategories: Record<string, Item[]>={};
 
-    /*const menu: Item[]=[
-        { name: 'Classic Milk Tea', group: 'Milk Tea', cost: 4.5, id: 0},
-        { name: 'Honey Milk Tea', group: 'Milk Tea', cost: 4.75, id: 1},
-        { name: 'Classic Coffee', group: 'Milk Tea', cost: 4.85, id: 2},
-        { name: 'Coffee Milk Tea', group: 'Milk Tea', cost: 5, id: 3},
-        { name: 'Classic tea', group: 'Brewed Tea', cost: 4.25, id: 4},
-        { name: 'Wintermelon Tea', group: 'Brewed Tea', cost: 4.5, id: 5},
-        { name: 'Honey Tea', group: 'Brewed Tea', cost:4.5, id: 6},
-        { name: 'Ginger Tea', group: 'Brewed Tea', cost: 4.5, id: 7},
-        { name: 'Mango Green Tea', group: 'Fruit Tea', cost: 4.95, id: 8},
-        { name: 'Wintermelon Lemonade', group: 'Fruit Tea', cost: 4.95, id: 9},
-        { name: 'Strawberry Tea', group: 'Fruit Tea', cost: 4.95, id: 10},
-        { name: 'Peach Tea with Aiyu Jelly', group: 'Fruit Tea', cost: 5.25, id: 11},
-        { name: 'Fresh Milk Tea', group: 'Fresh Milk', cost: 5, id: 12},
-        { name: 'Wintermelon with Fresh Milk', group: 'Fresh Milk', cost: 5.25, id: 13},
-        { name: 'Cocoa Lover with Fresh Milk', group: 'Fresh Milk', cost: 5.25, id: 14},
-        { name: 'Fresh Milk Family', group: 'Fresh Milk', cost: 5.25, id: 15},
-    ]*/
-
-   const menuCategories: Record<string, Item[]>={};
-
-   menu.forEach(item=>{
-    if(menuCategories[item.group]){
-        menuCategories[item.group].push(item);
-    }
-    else {
-        menuCategories[item.group] = [];
-        menuCategories[item.group].push(item);}
-   });
-
-   const add_Item=(item:Item)=>{
-        set_Cart_Items(prev_Items=>{
-            const new_Item={name: item.name, group: item.group, cost: item.cost, id: item.id};
-            return prev_Items.concat(new_Item);
-        });
-   };
-
-   const remove_Item=(id:number)=>{
-    set_Cart_Items(prev_Items=>{
-        const new_Item: Item[]=[];
-        prev_Items.forEach(item=>{
-            if (!(id === item.id))
-                new_Item.push(item);
-        });
-        return new_Item;
+    menu.forEach(item=>{
+     if(menuCategories[item.group]){
+         menuCategories[item.group].push(item);
+     }
+     else {
+         menuCategories[item.group] = [];
+         menuCategories[item.group].push(item);}
     });
-   };
+ 
+    const add_Item=(item:Item)=>{
+         set_Cart_Items(prev_Items=>{
+             const new_Item={name: item.name, group: item.group, cost: item.cost, id: item.id};
+             return prev_Items.concat(new_Item);
+         });
+    };
+ 
+    const remove_Item=(id:number)=>{
+     set_Cart_Items(prev_Items=>{
+         const new_Item: Item[]=[];
+         prev_Items.forEach(item=>{
+             if (!(id === item.id))
+                 new_Item.push(item);
+         });
+         return new_Item;
+     });
+    };
+ 
+     
+     let total_Cost = 0;
+     cart_Items.forEach(item=>{
+         total_Cost += item.cost;
+     });
+ 
 
-    
-    let total_Cost = 0;
-    cart_Items.forEach(item=>{
-        total_Cost += item.cost;
-    });
-
-    return(
-        <div style = {{
-            width: '100%',
-            display: 'flex'
+    return (
+        <div style={{ width: '100%', display: 'flex' }}>
+            {/* Weather Display - Top Right */}
+            <div style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                background: 'rgba(29, 13, 13, 0.87)',
+                padding: '10px',
+                borderRadius: '8px',
+                boxShadow: '2px 2px 10px rgba(0, 0, 0, 0.1)'
             }}>
-            {/*Left (80%) side of the page, menu item buttons*/}
+                <h3>Weather</h3>
+                {weatherError ? (
+                    <p style={{ color: 'red' }}>{weatherError}</p>
+                ) : weatherData ? (
+                    <div>
+                        <p>🌡️ Current Temp: {weatherData.current.temperature2m}°F</p>
+                        <p>📅 Hourly Forecast:</p>
+                        <ul style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                            {weatherData.hourly.time.map((time: Date, index: number) => (
+                                <li key={index}>
+                                    {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} — {weatherData.hourly.temperature2m[index]}°F
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ) : (
+                    <p>Loading Weather...</p>
+                )}
+            </div>
+
             <div style= {{
                 width: '80%',
                 display: 'flex',
