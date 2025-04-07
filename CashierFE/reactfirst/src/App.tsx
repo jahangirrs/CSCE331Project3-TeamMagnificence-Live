@@ -13,27 +13,21 @@ type Item = {
 function App() {
     const [cart_Items, set_Cart_Items] = useState<Item[]>([]);
     const [menu_Items, set_Menu] = useState("");
-    const [weatherData, setWeatherData] = useState<any>(null);
-    const [weatherError, setWeatherError] = useState<string | null>(null); // To capture errors
 
-    const menu: Item[]=[
-        { name: 'Classic Milk Tea', group: 'Milk Tea', cost: 4.5, id: 0},
-        { name: 'Honey Milk Tea', group: 'Milk Tea', cost: 4.75, id: 1},
-        { name: 'Classic Coffee', group: 'Milk Tea', cost: 4.85, id: 2},
-        { name: 'Coffee Milk Tea', group: 'Milk Tea', cost: 5, id: 3},
-        { name: 'Classic tea', group: 'Brewed Tea', cost: 4.25, id: 4},
-        { name: 'Wintermelon Tea', group: 'Brewed Tea', cost: 4.5, id: 5},
-        { name: 'Honey Tea', group: 'Brewed Tea', cost:4.5, id: 6},
-        { name: 'Ginger Tea', group: 'Brewed Tea', cost: 4.5, id: 7},
-        { name: 'Mango Green Tea', group: 'Fruit Tea', cost: 4.95, id: 8},
-        { name: 'Wintermelon Lemonade', group: 'Fruit Tea', cost: 4.95, id: 9},
-        { name: 'Strawberry Tea', group: 'Fruit Tea', cost: 4.95, id: 10},
-        { name: 'Peach Tea with Aiyu Jelly', group: 'Fruit Tea', cost: 5.25, id: 11},
-        { name: 'Fresh Milk Tea', group: 'Fresh Milk', cost: 5, id: 12},
-        { name: 'Wintermelon with Fresh Milk', group: 'Fresh Milk', cost: 5.25, id: 13},
-        { name: 'Cocoa Lover with Fresh Milk', group: 'Fresh Milk', cost: 5.25, id: 14},
-        { name: 'Fresh Milk Family', group: 'Fresh Milk', cost: 5.25, id: 15},
-    ]
+        React.useEffect(()=>{
+          fetch("http://localhost:3000/" + "manager/menu")
+          .then((res) => res.json())
+          .then((data) => set_Menu(data))
+          .catch(e => console.log(e))
+        }, []);
+
+        var menu_Data = JSON.parse(JSON.stringify(menu_Items));
+        const menu: Item[] = [];
+        for(var i in menu_Data){
+            menu.push({id: menu_Data[i].id, name: menu_Data[i].item_name, cost: menu_Data[i].base_cost, group: menu_Data[i].item_group});
+        }
+
+    const [weatherData, setWeatherData] = useState<any>(null);
 
     const getWeatherIcon = (code: number): string => {
         if ([0].includes(code)) return "☀️";             // Clear
@@ -94,13 +88,12 @@ function App() {
                 console.log("Weather data received:", weatherData);
             } catch (error) {
                 console.error("Error fetching weather data:", error);
-                setWeatherError("Failed to load weather data. Check console.");
             }
         };
     
         fetchWeather();
     }, []);
-
+    
     const menuCategories: Record<string, Item[]>={};
 
    menu.forEach(item=>{
