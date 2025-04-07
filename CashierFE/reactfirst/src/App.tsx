@@ -24,7 +24,26 @@ type Item={
 function App() {
     const [cart_Items, set_Cart_Items] = useState<Item[]>([]);
 
-    const menu: Item[]=[
+    
+        const [menu_Items, set_Menu] = useState("");
+      
+        React.useEffect(()=>{
+          fetch("http://localhost:3000/" + "manager/menu")
+          .then((res) => res.json())
+          .then((data) => set_Menu(data))
+          .catch(e => console.log(e))
+        }, []);
+      
+        var menu_Data = JSON.parse(JSON.stringify(menu_Items));
+        const menu: Item[] = [];
+        for(var i in menu_Data){
+            menu.push({id: menu_Data[i].id, name: menu_Data[i].item_name, cost: menu_Data[i].base_cost, group: menu_Data[i].item_group});
+        }
+          
+        
+
+
+    /*const menu: Item[]=[
         { name: 'Classic Milk Tea', group: 'Milk Tea', cost: 4.5, id: 0},
         { name: 'Honey Milk Tea', group: 'Milk Tea', cost: 4.75, id: 1},
         { name: 'Classic Coffee', group: 'Milk Tea', cost: 4.85, id: 2},
@@ -41,7 +60,7 @@ function App() {
         { name: 'Wintermelon with Fresh Milk', group: 'Fresh Milk', cost: 5.25, id: 13},
         { name: 'Cocoa Lover with Fresh Milk', group: 'Fresh Milk', cost: 5.25, id: 14},
         { name: 'Fresh Milk Family', group: 'Fresh Milk', cost: 5.25, id: 15},
-    ]
+    ]*/
 
    const menuCategories: Record<string, Item[]>={};
 
