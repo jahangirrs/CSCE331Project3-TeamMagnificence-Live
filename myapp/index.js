@@ -347,7 +347,10 @@ app.get("/manager/zreport", (req, res) => {
             res.status(500).json({ error: "Error checking previous reports" });
         });
 });
- 
+
+ //front end url
+const FrontendURL = "https://csce331project3-teammagnificence-live-o7uu.onrender.com/";
+//const FrontendURL = "http://localhost:5173";
 //
 app.get("/auth", (req, res) => {
     //send data to google to get user Data
@@ -355,7 +358,7 @@ app.get("/auth", (req, res) => {
             code: req.query.code,
             client_id: "104092234806-rmjagmekkhhcrd303i16jd0cblcp9a8g.apps.googleusercontent.com",
             client_secret: process.env.CLIENT_SECRET,
-             redirect_uri: "http://localhost:5173",
+             redirect_uri: FrontendURL,
              grant_type: "authorization_code"
         })})
         .then(res => res.json())
