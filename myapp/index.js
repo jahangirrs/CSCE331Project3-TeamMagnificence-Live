@@ -379,7 +379,7 @@ app.get("/user", (req,res) => {
 
             //determine type of user and send to front end
             if(user.length === 1){
-                if(user[0].employee_id === 0 && user[0].name !== "Stefan Dawson"){
+                if( user[0].employee_id === null|| user[0].employee_id === 0 && user[0].name !== "Stefan Dawson"){
                     res.json({path:"/Customer"});
                 }
                 else if(user[0].employee_id !== 0){
