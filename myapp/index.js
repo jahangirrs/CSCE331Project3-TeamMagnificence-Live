@@ -16,7 +16,7 @@ const FrontendURL = "https://csce331project3-teammagnificence-live-o7uu.onrender
 
 //Set who can request
 const corsOrigin = {
-    origin: FrontendURL
+    origin: [FrontendURL, "https://csce331project3-teammagnificence-live-o7uu.onrender.com"]
 }
 app.use(cors(corsOrigin));
 
