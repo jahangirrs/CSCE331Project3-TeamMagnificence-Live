@@ -11,8 +11,8 @@ const app = express();
 const port = 3000;
 
 //front end url
-//const FrontendURL = "https://csce331project3-teammagnificence-live-o7uu.onrender.com/";
-const FrontendURL = "http://localhost:5173";
+const FrontendURL = "https://csce331project3-teammagnificence-live-o7uu.onrender.com/";
+//const FrontendURL = "http://localhost:5173";
 
 //Set who can request
 const corsOrigin = {
