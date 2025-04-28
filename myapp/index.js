@@ -671,12 +671,9 @@ app.get("/auth", (req, res) => {
         })})
         .then(res => res.json())
         .then((data) =>{
-            if(data.id_token !== null){
-            sub = jwtDecode(data.id_token).sub
-            }
-            else{
               console.log(data)
-            }
+            sub = jwtDecode(data.id_token).sub
+            
 
     user = [];
 
