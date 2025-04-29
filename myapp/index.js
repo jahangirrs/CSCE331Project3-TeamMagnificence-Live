@@ -602,7 +602,7 @@ app.get("/manager/zreport", (req, res) => {
                         })
                         .then(() => {
                             res.json({
-                              reportDate: today.toISOString().split('T')[0],
+                              reportDate: today.toString().split('T')[0],
                               totalSales: parseFloat(totalSales),
                               salesCount: parseInt(salesCount),
                               totalTax: parseFloat(totalTax.toFixed(2)),
