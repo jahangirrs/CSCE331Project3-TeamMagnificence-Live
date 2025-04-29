@@ -287,9 +287,9 @@ app.get("/manager/menu/:id", async (req, res) => {
 
       for (const link of inventoryLinks) {
         await client.query(
-          "UPDATE menuinventory SET invamount = $1 WHERE menuid = $2 AND inventoryid = $3",
-          [link.invamount, menuId, link.inventory_id]
-        );
+            "INSERT INTO menuinventory (menuid, inventoryid, invamount) VALUES($1, $2, $3) ON CONFLICT (menuid, inventoryid) DO UPDATE SET invamount = $3",
+            [menuId, link.inventory_id, link.invamount]
+        )
       }
   
       await client.query('COMMIT');
@@ -671,9 +671,7 @@ app.get("/auth", (req, res) => {
         })})
         .then(res => res.json())
         .then((data) =>{
-              console.log(data)
             sub = jwtDecode(data.id_token).sub
-            
 
     user = [];
 
@@ -689,7 +687,7 @@ app.get("/auth", (req, res) => {
             //determine type of user and send to front end
             if (user.length === 1) {
                 if (user[0].employee_id === null || user[0].employee_id === 0 && user[0].name !== "Stefan Dawson") {
-                    res.json({exists: true, path: "/Customer"});
+                    res.json({exists: true, path: "/Customer", allergens: user[0].allergens});
                 } else if (!user[0].ismanager) {
                     res.json({exists: true, path: "/Cashier"});
                 } else if (user[0].ismanager) {
