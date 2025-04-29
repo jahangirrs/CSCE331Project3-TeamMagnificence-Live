@@ -522,7 +522,8 @@ app.post('/submitOrder', async (req, res) => {
 // Add this endpoint to your existing index.js (before app.listen())
 app.get("/manager/zreport", (req, res) => {
     // Get current date and time
-    const today = new Date(Date.now.toLocaleString());
+    const UTCVer = new Date()
+    const today = new Date(UTCVer.getTime() - (5 * 60 * 60 * 1000) );
     const startOfDay = new Date(today);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(today);
@@ -598,11 +599,11 @@ app.get("/manager/zreport", (req, res) => {
                     // Record Z-Report generation
                     pool.query("DELETE FROM zreportgenerated;")
                         .then(() => {
-                            return pool.query("INSERT INTO zreportgenerated(id, date) VALUES (1, CURRENT_TIMESTAMP);");
+                            return pool.query("INSERT INTO zreportgenerated(id, date) VALUES (1, $1);", [today.toISOString()]);
                         })
                         .then(() => {
                             res.json({
-                              reportDate: today.toString().split('T')[0],
+                              reportDate: today.toISOString().split('T')[0],
                               totalSales: parseFloat(totalSales),
                               salesCount: parseInt(salesCount),
                               totalTax: parseFloat(totalTax.toFixed(2)),
