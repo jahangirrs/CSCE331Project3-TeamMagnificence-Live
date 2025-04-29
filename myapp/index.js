@@ -463,11 +463,18 @@ app.post('/submitOrder', async (req, res) => {
         await client.query(insertOrderQuery, [orderID, order.timestamp, order.orderTotal, 0, true]);
 
         for (const item of order.items) {
-            const menuOrderInsertQuery = `
+            // Find the menu index by item name
+            const menuIndex = menuItems.findIndex(name => name === item.name);
+
+            if (menuIndex !== -1) {
+                const menuid = menuIndex + 1; // Assuming menuid matches order in `menuItems` array (id = 1,2,3...)
+
+                const menuOrderInsertQuery = `
             INSERT INTO menuorders (orderid, menuid) 
             VALUES ($1, $2);
-            `;
-            await client.query(menuOrderInsertQuery, [orderID, item.menuid]);
+        `;
+                await client.query(menuOrderInsertQuery, [orderID, menuid]);
+            }
         }
 
         const stockNums = [
