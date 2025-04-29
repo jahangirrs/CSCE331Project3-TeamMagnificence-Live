@@ -462,6 +462,14 @@ app.post('/submitOrder', async (req, res) => {
 
         await client.query(insertOrderQuery, [orderID, order.timestamp, order.orderTotal, 0, true]);
 
+        for (const item of order.items) {
+            const menuOrderInsertQuery = `
+            INSERT INTO menuorders (orderid, menuid) 
+            VALUES ($1, $2);
+            `;
+            await client.query(menuOrderInsertQuery, [orderID, item.menuid]);
+        }
+
         const stockNums = [
             100, 100, 100, 100, 60,
             70, 70, 70, 50, 50,
