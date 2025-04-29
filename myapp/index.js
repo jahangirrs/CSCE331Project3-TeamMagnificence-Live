@@ -522,7 +522,7 @@ app.post('/submitOrder', async (req, res) => {
 // Add this endpoint to your existing index.js (before app.listen())
 app.get("/manager/zreport", (req, res) => {
     // Get current date and time
-    const today = new Date().toLocaleString();
+    const today = new Date(Date.now.toLocaleString());
     const startOfDay = new Date(today);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(today);
